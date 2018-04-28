@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { PageHeader, ListGroup, ListGroupItem } from "react-bootstrap";
 import { Link } from "react-router-dom";
+// import {CSVLink} from 'react-csv';
 import { API } from "aws-amplify";
 import "./Home.css";
 
@@ -10,7 +11,8 @@ export default class Home extends Component {
 
         this.state = {
             isLoading: true,
-            notes: []
+            notes: [],
+            notesArray: []
         };
     }
 
@@ -22,6 +24,13 @@ export default class Home extends Component {
         try {
             const notes = await this.notes();
             this.setState({ notes });
+            let contentArray = [];
+            for (let note of notes) {
+                // console.log(note.content)
+                contentArray.push(note.content)
+            }
+            this.setState({ notesArray: contentArray })
+            console.log(this.state.notesArray);
         } catch (e) {
             alert(e);
         }
@@ -33,7 +42,13 @@ export default class Home extends Component {
         return API.get("notes", "/notes");
     }
 
+    renderCSV(notes) {
+
+    }
+
     renderNotesList(notes) {
+
+
         return [{}].concat(notes).map(
             (note, i) =>
                 i !== 0
@@ -62,6 +77,11 @@ export default class Home extends Component {
         this.props.history.push(event.currentTarget.getAttribute("href"));
     }
 
+    downloadCSV = event => {
+        event.preventDefault();
+        console.log("Content of Notes array: ", this.state.notesArray);
+    }
+
     renderLander() {
         return (
             <div className="lander">
@@ -86,6 +106,9 @@ export default class Home extends Component {
                 <ListGroup>
                     {!this.state.isLoading && this.renderNotesList(this.state.notes)}
                 </ListGroup>
+                <Link to="/" onClick={this.downloadCSV} className="btn btn-primary btn-lg">
+                    Download CSV
+                </Link>
             </div>
         );
     }
